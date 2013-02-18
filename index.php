@@ -25,7 +25,8 @@ class importer {
      curl_setopt($ch, CURLOPT_URL, $this->remote);
      curl_setopt($ch, CURLOPT_HEADER, false);
      curl_setopt($ch,  CURLOPT_RETURNTRANSFER, true);
-     $this->data = curl_exec($ch);
+     $data = curl_exec($ch);
+     $this->data = htmlentities($data);
      curl_close($ch);
      }
 
