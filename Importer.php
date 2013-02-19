@@ -22,7 +22,8 @@ class importer {
         curl_setopt($ch, CURLOPT_HEADER, false);
         curl_setopt($ch,  CURLOPT_RETURNTRANSFER, true);
         $data = curl_exec($ch);
-        $this->data = htmlentities($data);
+        $clean= preg_replace('/&/', '/&amp;', $data); //otherwise, the parser chokes on un-escaped ampersands
+        $this->data = $clean;
         curl_close($ch);
      }
 

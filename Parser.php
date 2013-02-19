@@ -11,6 +11,7 @@ class Parser {
         $this->source = $infile;
         $this->doc = new DOMDocument();
         $this->doc->loadHTMLFile($this->source);
+        $this->doc->formatOutput=true;
         $this->body = $this->doc->getElementsByTagName('body');
     }
     

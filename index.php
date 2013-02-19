@@ -6,12 +6,20 @@ require_once dirname(__FILE__).'/Parser.php';
 require_once dirname(__FILE__).'/Importer.php';
 
 
+$html = "";
+$html.= "<head>";
+$html.= '<script src="lib/codemirror/lib/codemirror.js"></script>
+<link rel="stylesheet" href="lib/codemirror/lib/codemirror.css">
+<script src="lib/codemirror/mode/xml/xml.js"></script>';
+$html.="</head>";
+echo $html;
+
 //begin PAGE logic
-if(empty($_POST['nibble_form'])){
+if(empty($_POST['submit'])){
    render_form();
 }else{
 
-    $target = $_POST['nibble_form']['source_url'];
+    $target = $_POST['url'];
 
     $f = new importer($target);
     $f->fetch();
@@ -27,14 +35,14 @@ if(empty($_POST['nibble_form'])){
     
     if($paras){
         $i=0;
-        foreach($p->getParagraphs() as $p){
+        foreach($paras as $p){
             $p_class = $p->getAttribute('class');
             if($p_class == 'navline' or $p_class == 'seprline'){
                 unset($p);
                 continue;
             }
             $p->removeAttribute('class');
-            $p->setAttribute('id', 'p'.$i);
+            $p->setAttribute('idx', 'p'.$i);
             $p = $xml->importNode($p, true);
             $teiBody->appendChild($p);
             $i++;
@@ -43,9 +51,9 @@ if(empty($_POST['nibble_form'])){
         echo "no paragraphs found...";  
     }
 
-    echo $xml = $xml->saveXML();
-
-    render_form($xml);
+    $out = $xml->saveXML();
+    
+    render_form($out);
 
 }
 
@@ -54,17 +62,36 @@ if(empty($_POST['nibble_form'])){
 //echo $body->p[0];
 
 function render_form($xml){
-    /* Get an instance of the form called "form_one" */
-    $form = \Nibble\NibbleForms\NibbleForm::getInstance('form_one');
-    /* Add field using 3 arguments; field name, field type and field options */
-    $form->addField('source_url', 'url', array('required' => true));
-    $form->addField('xml', 'TextArea', 
-            array('required' => true
-                    ,'rows'  => 200
-                    ,'cols'  => 150
-                    ,'value' => $xml));
+    
+    $url        = HTML::tag('input', array('type'=>'text', 'name'=>'url'),'');
+    $textarea   = HTML::tag('textarea', array('id'=>'xml','name'=>'xml', 'rows'=>'200', 'cols'=>120), $xml);
+    $submit     = HTML::tag('input', array('type'=>'submit', 'name'=>'submit'),'',true);
+    $elements = $url.$textarea.$submit;
+    $form = HTML::tag('form', array('name'=>'test', 'method'=>'post'), $elements);
+    
+    $codemirror = '<script>CodeMirror.fromTextArea(xml,{mode: "text/xml"
+        , lineNumbers: "true"
+        , lineWrapping: "true"
+        });
+        </script>';
+    echo $form.$codemirror;
 
-    echo $form->render();
+}
 
+
+class HTML{
+    public static function tag($name, $attributes=null, $value=null, $empty=false){
+        $html = "";
+        $attrs= "";
+        if(!empty($attributes)){
+            foreach($attributes as $att => $val){
+                $attrs .= sprintf("%s=\"%s\"", $att, $val);
+            }
+        }
+        if($empty){
+            return sprintf("<%s %s/>", $name, $attrs);
+        }
+        return sprintf("<%s %s>%s</%s>", $name, $attrs, $value, $name);
+    }
 }
 ?>
