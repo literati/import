@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE TEI.2 PUBLIC "-//TEI P4//DTD Main DTD Driver File//EN" "http://www.tei-c.org/Guidelines/DTD/tei2.dtd">
+<TEI.2 id="" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title></title>
+        <author></author>
+        <principal>Jerry Kennedy</principal>
+        <respStmt>
+          <name>Jackie Thornton</name>
+          <resp>Electronic Retrieval and Markup</resp>
+        </respStmt>
+      </titleStmt>
+      <editionStmt>
+        <edition></edition>
+        <respStmt>
+          <name>Jackie Thornton</name>
+          <resp>Electronic Retrieval and Markup</resp>
+        </respStmt>
+      </editionStmt>
+      <extent>
+        <seg type="size" />
+        <seg type="format">XML File</seg>
+        <seg type="location" />
+      </extent>
+      <publicationStmt>
+        <distributor>
+          <address>
+   <addrLine>
+   <name type="organisation" />
+    </addrLine>
+    <addrLine />
+     <addrLine>
+     <name type="place" />
+    </addrLine>
+    <addrLine />
+    <addrLine />
+    </address>
+        </distributor>
+        <availability status="restricted">
+          <p />
+        </availability>
+        <date />
+        <pubPlace />
+        <publisher rend="italic" />
+        <date />
+      </publicationStmt>
+      <notesStmt>
+        <note>APC Project</note>
+      </notesStmt>
+      <sourceDesc>
+        <bibl>
+          <title></title>
+          <author></author>
+          <publisher></publisher>
+          <date></date>
+        </bibl>
+      </sourceDesc>
+      <sourceDesc>
+        <bibl>
+          <title>The Edgar Allan Poe Society of Baltimore</title>
+          <author>Jeffrey A. Savoye
+  </author>
+          <date></date>
+        </bibl>
+      </sourceDesc>
+    </fileDesc>
+    <encodingDesc>
+      <editorialDecl>
+        <p />
+      </editorialDecl>
+      <refsDecl>
+        <p />
+      </refsDecl>
+    </encodingDesc>
+    <profileDesc>
+      <textClass>
+        <keywords scheme="LCNA">
+          <list>
+            <head>Geographic Names</head>
+            <item></item>
+          </list>
+        </keywords>
+        <keywords>
+          <list>
+            <head>Literary Types</head>
+            <item></item>
+          </list>
+        </keywords>
+      </textClass>
+    </profileDesc>
+    <revisionDesc>
+      <change>
+        <date></date>
+        <name>Jackie Thornton</name>
+      </change>
+    </revisionDesc>
+  </teiHeader>
+  <text>
+    <front>
+      <titlePage>
+        <docTitle>
+          <titlePart></titlePart>
+        </docTitle>
+        <docAuthor></docAuthor>
+        <docDate />
+      </titlePage>
+    </front>
+    <body>
+    </body>
+  </text>
+</TEI.2>
