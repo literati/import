@@ -6,16 +6,16 @@
       <titleStmt>
         <title></title>
         <author></author>
-        <principal>Jerry Kennedy</principal>
+        <principal></principal>
         <respStmt>
-          <name>Jackie Thornton</name>
+          <name></name>
           <resp>Electronic Retrieval and Markup</resp>
         </respStmt>
       </titleStmt>
       <editionStmt>
         <edition></edition>
         <respStmt>
-          <name>Jackie Thornton</name>
+          <name></name>
           <resp>Electronic Retrieval and Markup</resp>
         </respStmt>
       </editionStmt>
@@ -47,7 +47,7 @@
         <date />
       </publicationStmt>
       <notesStmt>
-        <note>APC Project</note>
+        <note></note>
       </notesStmt>
       <sourceDesc>
         <bibl>
@@ -59,8 +59,8 @@
       </sourceDesc>
       <sourceDesc>
         <bibl>
-          <title>The Edgar Allan Poe Society of Baltimore</title>
-          <author>Jeffrey A. Savoye
+          <title></title>
+          <author>
   </author>
           <date></date>
         </bibl>
@@ -93,7 +93,7 @@
     <revisionDesc>
       <change>
         <date></date>
-        <name>Jackie Thornton</name>
+        <name></name>
       </change>
     </revisionDesc>
   </teiHeader>
