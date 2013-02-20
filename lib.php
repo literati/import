@@ -49,15 +49,16 @@ class WorkflowManager{
     
     public function presentLevel0Draft(){
         $this->xmlMgr = new XMLManager();
-        echo $this->xmlMgr->getLevel0draft($this->workspace->getFilesystemPath($this->workspace->rawFilename));
+        $xml = $this->xmlMgr->getLevel0draft($this->workspace->getFilesystemPath($this->workspace->rawFilename));
+        return $xml;
     }
     
     private function saveRawFile(){
-        
+        $this->workspace->saveLevel0();
     }
     
-    public function saveLevel0Draft($data){
-        
+    public function saveLevel0Draft($xml){
+        $this->workspace->saveLevel0($xml);
     }
     
 }
@@ -113,8 +114,12 @@ class Workspace{
         $this->filemanager->save($data, $this->cwd.'/'.$this->rawFilename);
     }
     
-    public function save(){
-        
+    public function saveLevel0($xml){
+//        print_r($xml);
+        if($this->filemanager->save($xml, $this->cwd.'/'.$this->filename.'-0'.'.xml')){
+            return true;
+        }
+        return false;
     }
     
     public function getFilesystemPath($filename){
@@ -211,10 +216,9 @@ class XMLManager{
                 array('class'=>'navline', 'class'=>'seprline'), 
                 array('class'));
         $teiBody = $template->getElementsByTagName('body')->item(0);
-//        print_r($cleanHTML);
-//        die();
+        
         foreach($cleanHTML as $p){
-//            $template->importNode($p, true);
+            $p = $template->importNode($p, true);
             $teiBody->appendChild($p);
         }
         
@@ -238,7 +242,15 @@ class XMLManager{
         return $xml;
     }
     
+    /**
+     * 
+     * @param DOMNodeList $elements currently, we know this will be a DOMNodeList of p tags...
+     * @param array $delete array of attr=>val pairs to use as indicators of elements that should be deleted
+     * @param array $remove array of attribute names to remove from all nodes in $elements
+     * @return DOMNodeList without any of the junk specified in the input params
+     */
     private function deClutter($elements, $delete, $remove){
+        $new = new DOMDocument();
         foreach($elements as $element){
             
             $i=0;
@@ -250,34 +262,72 @@ class XMLManager{
                     }
                 }
             }
-            foreach($remove as $attr => $val){
+            foreach($remove as $attr){
                 if(!isset($element)){
                     continue;
                 }
                 if($element->hasAttribute($attr)){
                     $element->removeAttribute($attr);
+                    $element = $new->importNode($element, true);
+                    $new->appendChild($element);
                 }
             }    
         }
-        return $elements;
+        return $new->getElementsByTagName('p');
     }
 }
 
-//test that filemanaer decomposes Paths correctly
-$f = new FileManager();
-print_r($f->decomposePath('http://lsu.edu/index.html'));
-print_r($f->decomposePath('http://eapoe.org/works/letters/p3606075.htm'));
 
-$url = 'http://eapoe.org/works/letters/p3606075.htm';
+class FormsManager {
+    
+    public static function render_editor_form($xml, $workflow){
+//        print_r($_POST);
+        $codemirror = '<script>CodeMirror.fromTextArea(xml,{mode: "text/xml"
+            , lineNumbers: "true"
+            , lineWrapping: "true"
 
-$w = new Workspace($url);
+            });
+            </script>';
 
 
-echo "<br/><br/>";
+        $textarea   = HTML::tag('textarea', array('id'=>'xml','name'=>'xml', 'rows'=>'200', 'cols'=>120), $xml);
+        $workflow   = HTML::tag('input', array('type'=>'hidden', 'name'=>'workflow', 'value'=>htmlspecialchars($workflow)),'',true);
+        $submit     = HTML::tag('input', array('type'=>'submit', 'name'=>'submit-editor', 'value'=>'Save'),'',true);
+        $elements = $workflow.$textarea.$codemirror."<br/>".$submit;
 
-$wk = new WorkflowManager();
+        $form = HTML::tag('form', array('name'=>'test', 'method'=>'post'), $elements);
 
-$wk->import($url);
 
-$wk->presentLevel0Draft();
+        return $form;
+
+    }
+    
+    public static function render_url_form(){
+        $url        = HTML::tag('input', array('type'=>'text', 'name'=>'url'),'');
+        $submit     = HTML::tag('input', array('type'=>'submit', 'name'=>'submit-url','value'=>'Fetch'),'',true);
+        $elements = $url.$submit;
+        $form = HTML::tag('form', array('name'=>'url', 'method'=>'post'), $elements);
+        return $form;
+    }
+}
+
+class HTML{
+    public static function tag($name, $attributes=null, $value=null, $empty=false){
+        $html = "";
+        $attrs= "";
+        if(!empty($attributes)){
+            foreach($attributes as $att => $val){
+                $attrs .= sprintf("%s=\"%s\" ", $att, $val);
+            }
+        }
+        if($empty){
+            return sprintf("<%s %s/>", $name, $attrs);
+        }
+        return sprintf("<%s %s>%s</%s>", $name, $attrs, $value, $name);
+    }
+    
+    public static function head($value=''){
+        echo self::tag('head', null, $value);
+    }
+}
 ?>
