@@ -5,6 +5,7 @@ class importer {
     
     public $data;
     public $remote;
+    public $file_name_orig;
     public $file_name;
     public $local_path;
     
@@ -12,8 +13,17 @@ class importer {
         $this->remote = $url;
         
         $comps = preg_split("#[//]+#", $this->trim_proto($this->remote));
-        $this->file_name = array_pop($comps);
+        $this->file_name_orig = array_pop($comps);
         $this->local_path = implode('/', $comps);
+        
+        if(strlen($this->file_name_orig) == 0){
+            $this->file_name_orig = 'index.html';
+        }
+        $name_parts = explode('.', $this->file_name_orig); //won't catch filenames with more than one dot
+        $this->file_name = array_shift($name_parts);
+        
+        print_r($this);
+        die();
     }
     
     public function fetch(){
@@ -45,12 +55,12 @@ class importer {
       * saves the fetched file in the local filesystem in a path resembling the original url
       * NB: this can only be called once per file, otherwise, we will trim too much of the path
       */
-     public function save_local(){
-         $target = self::FILES_DIR.DIRECTORY_SEPARATOR.$this->local_path;
+     public static function save_local($path, $filename, $data){
+         $target = self::FILES_DIR.DIRECTORY_SEPARATOR.$path;
          
          if(is_dir($target) or mkdir($target, 0755, true)){
-             if(($h = fopen($target.DIRECTORY_SEPARATOR.$this->file_name, 'w')) !== false){
-                 if(fwrite($h, $this->data) === false){
+             if(($h = fopen($target.DIRECTORY_SEPARATOR.$filename, 'w')) !== false){
+                 if(fwrite($h, $data) === false){
                      die("could not write to file");
                  }
              }
@@ -61,8 +71,8 @@ class importer {
          
      }
      
-     public function getLocalPath(){
-         return self::FILES_DIR.DIRECTORY_SEPARATOR.$this->local_path.DIRECTORY_SEPARATOR.$this->file_name;
+     public function getLocalPath($filename){
+         return self::FILES_DIR.DIRECTORY_SEPARATOR.$this->local_path.DIRECTORY_SEPARATOR.$filename;
      }
      
 }

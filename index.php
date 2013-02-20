@@ -4,6 +4,9 @@
 require_once dirname(__FILE__) . '/lib/Nibble-Forms/Nibble/NibbleForms/NibbleForm.php';
 require_once dirname(__FILE__).'/Parser.php';
 require_once dirname(__FILE__).'/Importer.php';
+require_once dirname(__FILE__).'/views/editor.php';
+require_once dirname(__FILE__).'/views/url.php';
+require_once dirname(__FILE__).'/views/html.php';
 
 
 $html = "";
@@ -15,83 +18,55 @@ $html.="</head>";
 echo $html;
 
 //begin PAGE logic
-if(empty($_POST['submit'])){
-   render_form();
-}else{
+if(isset($_POST['submit-url'])){
 
     $target = $_POST['url'];
 
+    //get the file, save a local copy
     $f = new importer($target);
     $f->fetch();
-    $f->save_local();
+    Importer::save_local($f->local_path, $f->file_name_orig, $f->data);
 
-    $p = new Parser($f->getLocalPath());
+    //get the local file, manipulate and save as...
+    $p = new Parser($f->getLocalPath($f->file_name_orig));
 
     $xml = new DOMDocument();
     $xml->load(importer::FILES_DIR.DIRECTORY_SEPARATOR.'apc-tei-bare.xml');
     $teiBody = $xml->getElementsByTagName('body')->item(0);
 
-    $paras = $p->getParagraphs();
     
-    if($paras){
-        $i=0;
-        foreach($paras as $p){
-            $p_class = $p->getAttribute('class');
-            if($p_class == 'navline' or $p_class == 'seprline'){
-                unset($p);
-                continue;
-            }
-            $p->removeAttribute('class');
-            $p->setAttribute('idx', 'p'.$i);
-            $p = $xml->importNode($p, true);
-            $teiBody->appendChild($p);
-            $i++;
+    $i=0;
+    foreach($p->getParagraphs() as $p){
+        $p_class = $p->getAttribute('class');
+        if($p_class == 'navline' or $p_class == 'seprline'){
+            unset($p);
+            continue;
         }
-    }else{
-        echo "no paragraphs found...";  
+        $p->removeAttribute('class');
+//            $p->setAttribute('idx', 'p'.$i);
+        $p = $xml->importNode($p, true);
+        $teiBody->appendChild($p);
+        $i++;
     }
-
-    $out = $xml->saveXML();
+   
     
-    render_form($out);
+    echo view_editor::render_editor_form($xml->saveXML(), $f->local_path, $f->file_name);
 
+}elseif(isset($_POST['submit-editor'])){
+    $path = $_POST['path'];
+    $data = $_POST['xml'];
+    $name = $_POST['filename'];
+    $ext  = ".level-0.xml";
+    
+    importer::save_local($path, $name.$ext, $data);
+    echo "saving to ".$name." ".$data." ". $path.$ext;
+//    header('Location: index.php');
+    
+    
+}else{
+    echo view_url::render_url_form();
 }
 
 
 
-//echo $body->p[0];
-
-function render_form($xml){
-    
-    $url        = HTML::tag('input', array('type'=>'text', 'name'=>'url'),'');
-    $textarea   = HTML::tag('textarea', array('id'=>'xml','name'=>'xml', 'rows'=>'200', 'cols'=>120), $xml);
-    $submit     = HTML::tag('input', array('type'=>'submit', 'name'=>'submit'),'',true);
-    $elements = $url.$textarea.$submit;
-    $form = HTML::tag('form', array('name'=>'test', 'method'=>'post'), $elements);
-    
-    $codemirror = '<script>CodeMirror.fromTextArea(xml,{mode: "text/xml"
-        , lineNumbers: "true"
-        , lineWrapping: "true"
-        });
-        </script>';
-    echo $form.$codemirror;
-
-}
-
-
-class HTML{
-    public static function tag($name, $attributes=null, $value=null, $empty=false){
-        $html = "";
-        $attrs= "";
-        if(!empty($attributes)){
-            foreach($attributes as $att => $val){
-                $attrs .= sprintf("%s=\"%s\"", $att, $val);
-            }
-        }
-        if($empty){
-            return sprintf("<%s %s/>", $name, $attrs);
-        }
-        return sprintf("<%s %s>%s</%s>", $name, $attrs, $value, $name);
-    }
-}
 ?>
