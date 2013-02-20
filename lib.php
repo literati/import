@@ -135,7 +135,7 @@ class Workspace{
  */
 class FileManager{
     
-    const NEW_FILES_DIR = '/var/www/html/import/newfiles/';
+    const NEW_FILES_DIR = '/var/www/html/import/files/';
     const TEMPLATES_DIR = '/var/www/html/import/templates/';
 
     
