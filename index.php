@@ -1,72 +1,56 @@
 <?php
 
-//require forms lib
-require_once dirname(__FILE__) . '/lib/Nibble-Forms/Nibble/NibbleForms/NibbleForm.php';
-require_once dirname(__FILE__).'/Parser.php';
-require_once dirname(__FILE__).'/Importer.php';
-require_once dirname(__FILE__).'/views/editor.php';
-require_once dirname(__FILE__).'/views/url.php';
-require_once dirname(__FILE__).'/views/html.php';
-
-
+require_once 'lib.php';
 $html = "";
 $html.= "<head>";
-$html.= '<script src="lib/codemirror/lib/codemirror.js"></script>
-<link rel="stylesheet" href="lib/codemirror/lib/codemirror.css">
-<script src="lib/codemirror/mode/xml/xml.js"></script>';
+
 $html.="</head>";
 echo $html;
+//test that filemanaer decomposes Paths correctly
+//$f = new FileManager();
+//print_r($f->decomposePath('http://lsu.edu/index.html'));
+//print_r($f->decomposePath('http://eapoe.org/works/letters/p3606075.htm'));
+//
+$url = 'http://eapoe.org/works/letters/p3606075.htm';
+//
+//$w = new Workspace($url);
+//
+//
+//echo "<br/><br/>";
 
-//begin PAGE logic
-if(isset($_POST['submit-url'])){
 
-    $target = $_POST['url'];
 
-    //get the file, save a local copy
-    $f = new importer($target);
-    $f->fetch();
-    Importer::save_local($f->local_path, $f->file_name_orig, $f->data);
-
-    //get the local file, manipulate and save as...
-    $p = new Parser($f->getLocalPath($f->file_name_orig));
-
-    $xml = new DOMDocument();
-    $xml->load(importer::FILES_DIR.DIRECTORY_SEPARATOR.'apc-tei-bare.xml');
-    $teiBody = $xml->getElementsByTagName('body')->item(0);
-
+if(isset($_POST['submit-editor'])){
+    //save the level 0 version
+    echo HTML::head();
     
-    $i=0;
-    foreach($p->getParagraphs() as $p){
-        $p_class = $p->getAttribute('class');
-        if($p_class == 'navline' or $p_class == 'seprline'){
-            unset($p);
-            continue;
-        }
-        $p->removeAttribute('class');
-//            $p->setAttribute('idx', 'p'.$i);
-        $p = $xml->importNode($p, true);
-        $teiBody->appendChild($p);
-        $i++;
+    $wk = unserialize($_POST['workflow']);
+    $xml = $_POST['xml'];
+    if($wk->saveLevel0Draft($xml)){
+        header('Location: test.php');
+    }else{
+        die('file save failed');
     }
-   
+}elseif(isset($_POST['submit-url'])){
+    //import the file at url and display the editor
+    $url = $_POST['url'];
+    $codemirror_head = '<script src="lib/codemirror/lib/codemirror.js"></script>
+<link rel="stylesheet" href="lib/codemirror/lib/codemirror.css">
+<script src="lib/codemirror/mode/xml/xml.js"></script>';
+    echo HTML::head($codemirror_head);
+    $wk = new WorkflowManager();
+    $wk->import($url);
     
-    echo view_editor::render_editor_form($xml->saveXML(), $f->local_path, $f->file_name);
+    
+    $xml = $wk->presentLevel0Draft();
+    echo FormsManager::render_editor_form($xml, serialize($wk));
+    
 
-}elseif(isset($_POST['submit-editor'])){
-    $path = $_POST['path'];
-    $data = $_POST['xml'];
-    $name = $_POST['filename'];
-    $ext  = ".level-0.xml";
-    
-    importer::save_local($path, $name.$ext, $data);
-    echo "saving to ".$name." ".$data." ". $path.$ext;
-//    header('Location: index.php');
-    
-    
 }else{
-    echo view_url::render_url_form();
+    //just render the url form
+    echo HTML::head();
+    echo FormsManager::render_url_form();
 }
-
 
 
 ?>
